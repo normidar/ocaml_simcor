@@ -1,0 +1,4 @@
+(executable
+ (public_name simcor)
+ (name main)
+ (libraries simcor))

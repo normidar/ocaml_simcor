@@ -20,18 +20,18 @@ type seihin_status = {
 }
 
 let product_list = [
-  {name = "power"; price = 0.25; use_building = "power_plant"; need = []; cost = 0.2; produce_speed = 2465.54; transport = 0.;};
+  {name = "power"; price = 0.25; use_building = "power_plant"; need = []; cost = 0.02; produce_speed = 2465.54; transport = 0.;};
   {name = "water"; price = 0.32; use_building = "water_reservoir"; need = [("power",0.2)]; cost = 0.03; produce_speed = 1575.34;transport = 0.;};
   {name = "seeds"; price = 0.2; use_building = "plantation"; need = [("water",0.1)]; cost = 0.01; produce_speed = 887.37; transport = 0.1;};
   {name = "wood"; price = 3.; use_building = "plantation"; need = [("water",4.);("seeds",1.)]; cost = 0.17; produce_speed = 76.64; transport = 1.;};
   {name = "limestone"; price = 1.39; use_building = "quarry"; need = [("power",2.)]; cost = 0.05; produce_speed = 683.24; transport = 1.;};
-  {name = "cement"; price = 5.9; use_building = "concrete_plant"; need = [("limestone",3.)]; cost = 0.16; produce_speed = 287.89; transport = 1.;};
-  {name = "sand"; price = 1.13; use_building = "quarry"; need = [("power",2.)]; cost = 0.03; produce_speed = 1220.07; transport = 1.;};
+  {name = "cement"; price = 6.; use_building = "concrete_plant"; need = [("limestone",3.)]; cost = 0.16; produce_speed = 287.89; transport = 1.;};
+  {name = "sand"; price = 1.14; use_building = "quarry"; need = [("power",2.)]; cost = 0.03; produce_speed = 1220.07; transport = 1.;};
   {name = "iron_ore"; price = 4.5; use_building = "mine"; need = [("power",7.);("water",0.5)]; cost = 0.22; produce_speed = 156.17; transport = 1.;};
   {name = "minerals"; price = 11.; use_building = "mine"; need = [("power",20.);("water",1.)]; cost = 0.33; produce_speed = 102.49; transport = 1.;};
   {name = "chemicals"; price = 14.9; use_building = "factory"; need = [("power",0.2);("minerals",1.)]; cost = 0.25; produce_speed = 205.46; transport = 1.;};
-  {name = "steel"; price = 11.4; use_building = "factory"; need = [("power",5.);("iron_ore",1.);("chemicals",0.1)]; cost = 0.28; produce_speed = 184.92; transport = 1.;};
-  {name = "reinforced_concrete"; price = 181.; use_building = "concrete_plant"; need = [("cement",15.);("sand",20.);("water",20.);("steel",5.)]; cost = 0.26; produce_speed = 181.59; transport = 10.;};
+  {name = "steel"; price = 11.2; use_building = "factory"; need = [("power",5.);("iron_ore",1.);("chemicals",0.1)]; cost = 0.28; produce_speed = 184.92; transport = 1.;};
+  {name = "reinforced_concrete"; price = 184.; use_building = "concrete_plant"; need = [("cement",15.);("sand",20.);("water",20.);("steel",5.)]; cost = 0.20; produce_speed = 181.59; transport = 10.;};
   {name = "clay"; price = 0.82; use_building = "quarry"; need = [("power",1.)]; cost = 0.04; produce_speed = 927.25; transport = 1.;};
   {name = "bricks"; price = 2.6; use_building = "concrete_plant"; need = [("clay",0.5)]; cost = 0.13; produce_speed = 354.32; transport = 1.;};
   {name = "cement"; price = 5.9; use_building = "concrete_plant"; need = [("limestone",3.)]; cost = 0.16; produce_speed = 287.89; transport = 1.;};
@@ -53,7 +53,10 @@ let product_list = [
   {name = "ethanol"; price = 23.; use_building = "beverage_factory"; need = [("power",20.);("sugarcane",10.)]; cost = 0.40; produce_speed = 59.77; transport = 1.;};
   {name = "diesel"; price = 40.75; use_building = "refinery"; need = [("power",15.);("crude_oil",0.75);("ethanol",0.25)]; cost = 0.44; produce_speed = 109.65; transport = 1.;};
   {name = "construction_unit"; price = 2610.; use_building = "general_contractor"; need = [("bulldozer",0.125);("diesel",5.);("windows",4.);("steel_beams",8.);("tools",4.)]; cost = 36.14; produce_speed = 0.95; transport = 0.;};
-
+  {name = "processors"; price = 122.; use_building = "electronics_factory"; need = [("silicon",4.);("chemicals",1.)]; cost = 4.03; produce_speed = 8.86; transport =1.;};
+  {name = "on-board_computer"; price = 478.; use_building = "electronics_factory"; need = [("processors",2.);("electronic_components",3.)]; cost = 2.69; produce_speed = 13.29; transport =1.;};
+  {name = "electric_motor"; price = 222.; use_building ="propulsion_factory"; need = [("steel",2.);("electronic_components",3.)]; cost = 2.03; produce_speed = 28.83; transport =2.;};
+  {name = "displays"; price = 125.; use_building ="electronics_factory"; need = [("silicon",5.);("chemicals",4.)]; cost = 1.15; produce_speed = 31.; transport =1.;};
 ]
 
 let building_list = [
@@ -98,9 +101,74 @@ let rec get_worker_wage building lst = match lst with
 | [] -> 0.
 | x :: xs -> if x.b_name = building then x.worker_wage else get_worker_wage building xs
 
-let rec count_worker_cost product lst = match lst with
-| [] -> 0.
-| x :: xs -> if x.name = product then 
-  (get_worker_wage x.use_building building_list) /. x.produce_speed else count_worker_cost product xs
+(*人件費の計算*)
+let worker_cost p = 
+    let rec count_worker_cost product lst = match lst with
+    | [] -> 0.
+    | x :: xs -> if x.name = product then 
+      (get_worker_wage x.use_building building_list) /. x.produce_speed else count_worker_cost product xs in
+  count_worker_cost p product_list
+let _ = worker_cost
+let () = print_endline ("Worker cost " ^ (string_of_float (worker_cost "power")))
 
-let () = print_endline (string_of_float (count_worker_cost "chemicals" product_list))
+(*produce cost equal worker_cost + cost + metarial_cost*)
+(*each hour earn equal (price - produce_cost) * produce_speed *)
+
+(*取り出し*)
+let get_product product =
+  let rec get_product_price _product lst = match lst with
+    | [] -> None
+    | x :: xs -> if x.name = _product then Some x else get_product_price _product xs in
+get_product_price product product_list
+let _ = get_product
+
+(*材料費の計算*)
+let product_price product =
+  let rec get_product_price _product lst = match lst with
+    | [] -> 0.
+    | x :: xs -> if x.name = _product then x.price else get_product_price _product xs in
+get_product_price product product_list
+
+let rec count_metarial_cost = function 
+| [] -> 0.
+| x :: xs -> 
+  let name, count = x in
+  (product_price name) *. count +. count_metarial_cost xs
+
+let metarial_cost product = 
+  let rec _product_metarial_lst p = function
+  | [] -> []
+  | x :: xs -> if x.name = p then x.need else _product_metarial_lst p xs in
+count_metarial_cost (_product_metarial_lst product product_list)
+
+let () = print_endline (string_of_float (metarial_cost "reinforced_concrete"))
+
+(*生産コストの計算*)
+let produce_cost product = 
+  let rec _produce_cost p = function
+  | [] -> 0.
+  | x :: xs -> if x.name = p then 
+    x.cost +. worker_cost p +. metarial_cost p +. x.transport *. 0.36 else
+    _produce_cost p xs in
+_produce_cost product product_list
+let _ = produce_cost
+
+(* let () = print_endline (string_of_float ( (produce_cost "wood"))) *)
+
+(*produce cost equal worker_cost + cost + metarial_cost*)
+(*each hour earn equal (price - produce_cost) * produce_speed *)
+
+(*毎時間利益計算*)
+let product = get_product "construction_unit"
+let count_earn = function
+  | None -> min_float
+  | Some x -> (x.price *. 0.97 -. produce_cost x.name) *. x.produce_speed
+let _ = count_earn product
+(* let () = print_endline (string_of_float (count_earn product)) *)
+
+let rec ff = function
+| [] -> ()
+| x :: xs -> print_endline (x.name ^ " + " ^ string_of_float(count_earn (Some x))) ;ff xs
+
+let () = ff product_list
+

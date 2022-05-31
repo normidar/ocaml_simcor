@@ -109,7 +109,7 @@ let worker_cost p =
       (get_worker_wage x.use_building building_list) /. x.produce_speed else count_worker_cost product xs in
   count_worker_cost p product_list
 let _ = worker_cost
-let () = print_endline ("Worker cost " ^ (string_of_float (worker_cost "power")))
+(* let () = print_endline ("Worker cost " ^ (string_of_float (worker_cost "power"))) *)
 
 (*produce cost equal worker_cost + cost + metarial_cost*)
 (*each hour earn equal (price - produce_cost) * produce_speed *)
@@ -141,7 +141,7 @@ let metarial_cost product =
   | x :: xs -> if x.name = p then x.need else _product_metarial_lst p xs in
 count_metarial_cost (_product_metarial_lst product product_list)
 
-let () = print_endline (string_of_float (metarial_cost "reinforced_concrete"))
+(* let () = print_endline (string_of_float (metarial_cost "reinforced_concrete")) *)
 
 (*生産コストの計算*)
 let produce_cost product = 
@@ -166,9 +166,27 @@ let count_earn = function
 let _ = count_earn product
 (* let () = print_endline (string_of_float (count_earn product)) *)
 
-let rec ff = function
+(* let rec ff = function
 | [] -> ()
 | x :: xs -> print_endline (x.name ^ " + " ^ string_of_float(count_earn (Some x))) ;ff xs
 
-let () = ff product_list
+let () = ff product_list *)
 
+
+
+
+(*周期計算*)
+let get_return_time p = 
+  let rec _get_build_time_cost building_name = function
+    | [] -> (max_float, max_int)
+    | x :: xs -> if x.b_name = building_name then (x.build_time, x.cost) else _get_build_time_cost building_name xs in
+  let (_time, _cost) = _get_build_time_cost p.use_building building_list in
+  let cost = (float_of_int _cost) in
+  let earn = count_earn (Some p) in
+  if earn < 0. then 0. else cost /. earn +. _time *. 2.
+
+let rec ff = function
+  | [] -> ()
+  | x :: xs -> print_endline (x.name ^ " + " ^ string_of_float((get_return_time x) /. 24.)) ;ff xs
+  
+let () = ff product_list

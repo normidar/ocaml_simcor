@@ -176,7 +176,7 @@ let () = ff product_list *)
 
 
 (*周期計算*)
-let get_return_time p = 
+let _get_return_time p = 
   let rec _get_build_time_cost building_name = function
     | [] -> (max_float, max_int)
     | x :: xs -> if x.b_name = building_name then (x.build_time, x.cost) else _get_build_time_cost building_name xs in
@@ -185,8 +185,25 @@ let get_return_time p =
   let earn = count_earn (Some p) in
   if earn < 0. then 0. else cost /. earn +. _time *. 2.
 
-let rec ff = function
+(* let rec ff = function
   | [] -> ()
   | x :: xs -> print_endline (x.name ^ " + " ^ string_of_float((get_return_time x) /. 24.)) ;ff xs
+  
+let () = ff product_list *)
+
+
+(*パワー計算*)
+let rec get_product_power = function
+| None -> -1.
+| Some p ->
+  let rec _count_power = function
+  | [] -> 0.
+  | x :: xs -> let (_name,_count) = x in
+    (get_product_power (get_product _name)) *. _count +. _count_power xs in
+  if p.name = "power" then 1. else _count_power p.need
+
+  let rec ff = function
+  | [] -> ()
+  | x :: xs -> print_endline (x.name ^ " + " ^ string_of_float(get_product_power (Some x))) ;ff xs
   
 let () = ff product_list
